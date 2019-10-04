@@ -73,9 +73,9 @@ Produce a well-labeled table that summarizes GDP per capita for the countries in
 ```{r}
 gapminder.1952 <-
   gapminder%>%
-  filter(year=="1952")%>%
+  filter(year==1952)%>%
   group_by(continent)%>%
-  summarize(GDP=sum(gdpPercap))
+  summarize(GDP=sum(gdpPercap)) #data of 1952
 
 year.1952 <- c(rep(1952,5))
 
@@ -83,9 +83,9 @@ gapminder.1952.new <- cbind(year.1952,gapminder.1952)
 
 gapminder.2007 <-
   gapminder%>%
-  filter(year=="2007")%>%
+  filter(year==2007)%>%
   group_by(continent) %>%
-  summarize(GDP=sum(gdpPercap))
+  summarize(GDP=sum(gdpPercap)) #data of 2007
 
 year.2007 <- c(rep(2007,5))
 
@@ -93,26 +93,36 @@ gapminder.2007.new <- cbind(year.2007,gapminder.2007)
 
 combined.gapminder.year <- cbind(gapminder.1952.new,gapminder.2007.new)
 
-kable(combined.gapminder.year)
+kable(combined.gapminder.year) #a table that summarizes GDP per capita for the countries in each continent, contrasting the years 1952 and 2007
 ```
 
 Product a plot that summarizes the same data as the table. There should be two plots per continent.
 ```{r}
-ggplot(data=gapminder.1952, aes(continent,GDP))+geom_point()
+gapminder.gdp <- 
+  gapminder%>%
+  filter(year==c(1952, 2007)) #data of 1952 and 2007
+ 
+ggplot(gapminder.gdp,aes(year,gdpPercap))+
+  geom_bar(mapping=aes(x=as.factor(year),y=gdpPercap),stat="identity")+
+  facet_grid(.~continent) #a plot that summarizes GDP per capita for the countries in each continent, contrasting the years 1952 and 2007
+``` 
 
-ggplot(data=gapminder.2007, aes(continent,GDP))+geom_point()
-```
 
 
 Which countries in the dataset have had periods of negative population growth?
 
 Illustrate your answer with a table or plot.
+```{r}
+
+```
 
 
 Which countries in the dataset have had the highest rate of growth in per capita GDP?
 
 Illustrate your answer with a table or plot.
+```{r}
 
+```
 \newpage
 
 ### Problem 2
@@ -125,9 +135,27 @@ head(Fertility)
 ```
 
 There are four possible gender combinations for the first two Children.  Product a plot the contracts the frequency of these four combinations. Are the frequencies different for women in their 20s and wemen who are older than 29?
+```{r}
+fertility.gender <- 
+  Fertility %>% 
+  unite(gender.combination, gender1, gender2) %>% 
+  select(gender.combination,age) %>% 
+  arrange(gender.combination)
 
+ggplot(fertility.gender, aes(x=gender.combination)) + geom_bar() #plot the contracts the frequency of these four combinations
+
+ggplot(fertility.gender, aes(x=gender.combination, fill=age>29)) + geom_bar() #plot the contracts the frequency of 20s and who are older than 29
+```
 Produce a plot that contrasts the frequency of having more than two children by race and ethnicity.  
+```{r}
+fertility.race <- 
+  Fertility %>% 
+  select(morekids,afam,hispanic,other) %>%
+  filter(morekids=="yes") %>%
+  gather(afam, hispanic, other, key="morekids", value = "No")
 
+ggplot(fertility.race, aes(x=morekids)) + geom_bar()
+```
 
 ### Problem 3
 
@@ -187,21 +215,140 @@ ggplot(data=combined.mpg,aes(manufacturer,mpg))+ geom_point() #Contrast the mile
 Install the babynames package.
 ```{r}
 library(babynames)
+head(babynames)
 ```
 
 Draw a sample of 500,000 rows from the babynames data
 ```{r}
-
+babynames.sample<-sample_n(babynames,500000)
 ```
 
 Produce a tabble that displays the five most popular boy names and girl names
 in the years 1880,1920, 1960, 2000.
+```{r}
+babynames.1880.F <-
+  babynames %>%
+  filter(year==1880,sex=="F")
+F.1880 <- 
+  babynames.1880.F %>%
+  group_by(name) %>%
+  summarise(sum(n))
+F.1880 <- F.1880[order(-F.1880$`sum(n)`),]
+F.1880.top5 <- F.1880[c(1:5),]
+year.1 <- rep(1880,5)
+baby.1880.F <- cbind(year.1,F.1880.top5)
 
+babynames.1880.M <-
+  babynames %>%
+  filter(year==1880,sex=="M")
+M.1880 <- 
+  babynames.1880.M %>%
+  group_by(name) %>%
+  summarise(sum(n))
+M.1880 <- M.1880[order(-M.1880$`sum(n)`),]
+M.1880.top5 <- M.1880[c(1:5),]
+baby.1880.M <- cbind(year.1,M.1880.top5)
+
+babynames.1920.F <-
+  babynames %>%
+  filter(year==1920,sex=="F")
+F.1920 <- 
+  babynames.1920.F %>%
+  group_by(name) %>%
+  summarise(sum(n))
+F.1920 <- F.1920[order(-F.1920$`sum(n)`),]
+F.1920.top5 <- F.1920[c(1:5),]
+year.2 <- rep(1920,5)
+baby.1920.F <- cbind(year.2,F.1920.top5)
+
+babynames.1920.M <-
+  babynames %>%
+  filter(year==1920,sex=="M")
+M.1920 <- 
+  babynames.1920.M %>%
+  group_by(name) %>%
+  summarise(sum(n))
+M.1920 <- M.1920[order(-M.1920$`sum(n)`),]
+M.1920.top5 <- M.1920[c(1:5),]
+baby.1920.M <- cbind(year.2,M.1920.top5)
+
+babynames.1960.F <-
+  babynames %>%
+  filter(year==1960, sex=="F")
+F.1960 <- 
+  babynames.1960.F %>%
+  group_by(name) %>%
+  summarise(sum(n))
+F.1960 <- F.1960[order(-F.1960$`sum(n)`),]
+F.1960.top5 <- F.1960[c(1:5),]
+year.3 <- rep(1960,5)
+baby.1960.F <- cbind(year.3,F.1960.top5)
+
+babynames.1960.M <-
+  babynames %>%
+  filter(year==1960, sex=="M")
+M.1960 <- 
+  babynames.1960.M %>%
+  group_by(name) %>%
+  summarise(sum(n))
+M.1960 <- M.1960[order(-M.1960$`sum(n)`),]
+M.1960.top5 <- F.1960[c(1:5),]
+baby.1960.M <- cbind(year.3,M.1960.top5)
+
+babynames.2000.F <-
+  babynames %>%
+  filter(year==2000,sex=="F")
+F.2000 <- 
+  babynames.2000.F %>%
+  group_by(name) %>%
+  summarise(sum(n))
+F.2000<- F.2000[order(-F.2000$`sum(n)`),]
+F.2000.top5 <- F.2000[c(1:5),]
+year.4 <- rep(2000,5)
+baby.2000.F <- cbind(year.4,F.2000.top5)
+
+babynames.2000.M <-
+  babynames %>%
+  filter(year==2000,sex=="M")
+M.2000 <- 
+  babynames.2000.M %>%
+  group_by(name) %>%
+  summarise(sum(n))
+M.2000<- M.2000[order(-M.2000$`sum(n)`),]
+M.2000.top5 <- M.2000[c(1:5),]
+baby.2000.M <- cbind(year.4,M.2000.top5)
+
+babytop5 <- cbind(baby.1880.F,baby.1880.M,baby.1920.F,baby.1920.M, baby.1960.F,baby.1960.M,baby.2000.F,baby.2000.M)
+
+kable(babytop5)
+```
 What names overlap boys and girls?
+```{r}
+boys <- filter(babynames,sex=='M')
+girls <- filter(babynames,sex=='F')
+overlap <- intersect(boys$name,girls$name)
+head(overlap)
+```
 
 What names were used in the 19th century but have not been used in the 21sth century?
+```{r}
+name19th <- filter(babynames,year>=1801 & year<=1900)
+name21th <- filter(babynames,year>=1990 & year<=1999)
+notusedin21st <- setdiff(name19th$name,name21th$name)
+head(notusedin21st)
+```
 
 Produce a chart that shows the relative frequency of the names "Donald", "Hilary", "Hillary", "Joe", "Barrack",  over the years 1880 through 2017.
+```{r}
+babynames.1880.2017 <- filter(babynames,year>=1880 & year<=2017)
+n<-length(babynames$name)
+babynames.1880.2017 <- filter(babynames.1880.2017,name=="Donald"|name=="Hilary"|name=="Hillary"|name== "Joe"|name=="Barrack")
+ff<-babynames.1880.2017 %>%
+  group_by(name) %>%
+  summarise(sum(n)/length(babynames$name))
+
+kable(ff)
+```
 
 
 
